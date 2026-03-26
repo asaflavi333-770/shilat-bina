@@ -892,13 +892,35 @@ function getGroups() {
 
 // ── BINA API ───────────────────────────────────────────────────────────────
 async function callProxy(payload) {
-  const url = S.proxy + '/bina';
-  const r = await fetch(url, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(payload)
-  });
-  return r.json();
+  // Try direct Bina call first (works when running from Israel)
+  const BINA_DIRECT = 'https://webfiles.binaw.com/post/PostJsonDocV2.aspx';
+  const TOKEN = '76b37357660475442296bc1b40140c54a63711ceacee30002af04286f21fc460-Shilat3583';
+  
+  try {
+    const body = { ...payload, tokenId: TOKEN };
+    const r = await fetch(BINA_DIRECT, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    const raw = await r.text();
+    try {
+      const pj = JSON.parse(raw);
+      const items = Array.isArray(pj) ? pj : pj.items || [];
+      return { success: true, parsed: { type: 'json', items }, raw };
+    } catch {
+      return { success: true, parsed: { type: raw.startsWith('*') ? 'bina_star' : 'unknown', items: [] }, raw };
+    }
+  } catch(e) {
+    // Fallback to proxy
+    const url = S.proxy + '/bina';
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    return r.json();
+  }
 }
 
 async function testConnection() {
