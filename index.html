@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>שילת | ניהול פריטים בינה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #e8520a;
+    --orange-dark: #c44108;
+    --orange-light: #fef0e9;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --green: #059669;
+    --red: #dc2626;
+    --blue: #2563eb;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.10);
+    --shadow: 0 4px 16px rgba(0,0,0,.10);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,.14);
+    --radius: 10px;
+    --panel-w: 400px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: var(--gray-100);
+    color: var(--gray-800);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── HEADER ─────────────────────────────────── */
+  header {
+    background: var(--gray-900);
+    color: #fff;
+    padding: 0 20px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 50;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 17px;
+  }
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--orange);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .logo-sub { font-size: 11px; font-weight: 400; color: var(--gray-400); margin-top: 1px; }
+  .header-sep { width: 1px; height: 28px; background: rgba(255,255,255,.1); }
+  .conn-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(255,255,255,.08);
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .conn-badge:hover { background: rgba(255,255,255,.14); }
+  .conn-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--gray-400);
+    transition: background .3s;
+  }
+  .conn-dot.ok   { background: var(--green); box-shadow: 0 0 0 3px rgba(5,150,105,.2); }
+  .conn-dot.err  { background: var(--red);   box-shadow: 0 0 0 3px rgba(220,38,38,.2); }
+  .conn-dot.spin {
+    background: var(--orange);
+    animation: pulse 1s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  .header-space { flex: 1; }
+  .h-btn {
+    background: rgba(255,255,255,.1);
+    border: none;
+    color: #fff;
+    padding: 7px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background .2s;
+  }
+  .h-btn:hover { background: rgba(255,255,255,.18); }
+  .h-btn.primary {
+    background: var(--orange);
+  }
+  .h-btn.primary:hover { background: var(--orange-dark); }
+
+  /* ── TOOLBAR ─────────────────────────────────── */
+  .toolbar {
+    background: #fff;
+    border-bottom: 1px solid var(--gray-200);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 40;
+  }
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    max-width: 380px;
+  }
+  .search-wrap input {
+    width: 100%;
+    padding: 8px 14px 8px 36px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .2s;
+    background: var(--gray-50);
+  }
+  .search-wrap input:focus { border-color: var(--orange); background: #fff; }
+  .search-icon {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    font-size: 14px;
+  }
+  .filter-select {
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    background: var(--gray-50);
+    color: var(--gray-700);
+    cursor: pointer;
+    outline: none;
+    min-width: 160px;
+  }
+  .filter-select:focus { border-color: var(--orange); }
+
+  .tb-sep { width: 1px; height: 28px; background: var(--gray-200); }
+  .item-count {
+    font-size: 12px;
+    color: var(--gray-500);
+    white-space: nowrap;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all .15s;
+  }
+  .btn-primary { background: var(--orange); color: #fff; }
+  .btn-primary:hover { background: var(--orange-dark); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+  .btn-ghost { background: transparent; color: var(--gray-600); border: 1.5px solid var(--gray-200); }
+  .btn-ghost:hover { background: var(--gray-50); border-color: var(--gray-300); }
+  .btn-danger { background: var(--red); color: #fff; }
+  .btn-danger:hover { background: #b91c1c; }
+
+  /* ── BODY LAYOUT ──────────────────────────────── */
+  .body-wrap {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    position: relative;
+  }
+
+  /* ── TABLE AREA ──────────────────────────────── */
+  .table-wrap {
+    flex: 1;
+    overflow: auto;
+    padding: 16px;
+    transition: margin-left .3s ease;
+  }
+  .table-wrap.panel-open { margin-left: var(--panel-w); }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    font-size: 13.5px;
+  }
+  thead th {
+    background: var(--gray-800);
+    color: #fff;
+    padding: 11px 14px;
+    text-align: right;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: .02em;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+  thead th:hover { background: var(--gray-700); }
+  thead th .sort-icon { opacity: .4; font-size: 10px; margin-right: 4px; }
+  thead th.sorted .sort-icon { opacity: 1; color: var(--orange); }
+
+  tbody tr {
+    border-bottom: 1px solid var(--gray-100);
+    cursor: pointer;
+    transition: background .12s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--orange-light); }
+  tbody tr.selected { background: #fde8db; }
+
+  td {
+    padding: 10px 14px;
+    vertical-align: middle;
+  }
+  td.code { font-family: monospace; font-size: 12px; color: var(--gray-500); }
+  td.name { font-weight: 500; color: var(--gray-900); }
+  td.price { font-variant-numeric: tabular-nums; }
+  td.group-cell {
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .group-tag {
+    background: var(--gray-100);
+    color: var(--gray-600);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+  }
+  .active-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .active-dot.yes { background: var(--green); }
+  .active-dot.no  { background: var(--gray-300); }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--gray-400);
+  }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state h3 { font-size: 18px; color: var(--gray-600); margin-bottom: 6px; }
+  .empty-state p { font-size: 13px; }
+
+  /* ── EDIT PANEL ──────────────────────────────── */
+  .edit-panel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--panel-w);
+    background: #fff;
+    border-right: 1px solid var(--gray-200);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(calc(-1 * var(--panel-w)));
+    transition: transform .3s ease;
+    z-index: 30;
+    box-shadow: var(--shadow-lg);
+  }
+  .edit-panel.open { transform: translateX(0); }
+
+  .panel-header {
+    padding: 16px 18px 14px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--gray-50);
+  }
+  .panel-title { font-size: 15px; font-weight: 700; flex: 1; }
+  .panel-close {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: var(--gray-200);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+  }
+  .panel-close:hover { background: var(--gray-300); }
+
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 18px;
+  }
+
+  .form-section {
+    margin-bottom: 18px;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-400);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .form-row { margin-bottom: 12px; }
+  .form-row label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-600);
+    margin-bottom: 4px;
+  }
+  .form-row input, .form-row select, .form-row textarea {
+    width: 100%;
+    padding: 8px 11px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--gray-800);
+    background: var(--gray-50);
+    outline: none;
+    transition: border-color .2s, background .2s;
+  }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+    border-color: var(--orange);
+    background: #fff;
+  }
+  .form-row textarea { min-height: 70px; resize: vertical; }
+  .form-row.half { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-row.half .inner label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-600); margin-bottom: 4px; }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .toggle-label { font-size: 13px; font-weight: 500; color: var(--gray-700); }
+  .toggle {
+    position: relative;
+    width: 40px; height: 22px;
+  }
+  .toggle input { display: none; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--gray-300);
+    border-radius: 11px;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .toggle-slider::after {
+    content: '';
+    position: absolute;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    top: 3px; right: 3px;
+    transition: transform .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  }
+  .toggle input:checked + .toggle-slider { background: var(--orange); }
+  .toggle input:checked + .toggle-slider::after { transform: translateX(-18px); }
+
+  .calc-hint {
+    font-size: 11px;
+    color: var(--gray-400);
+    margin-top: 3px;
+  }
+  .calc-hint span { color: var(--orange); font-weight: 600; }
+
+  .panel-footer {
+    padding: 14px 18px;
+    border-top: 1px solid var(--gray-100);
+    display: flex;
+    gap: 8px;
+    background: var(--gray-50);
+  }
+  .panel-footer .btn { flex: 1; justify-content: center; }
+
+  /* ── BINA RESPONSE AREA ─────────────────────── */
+  .bina-status {
+    font-size: 11px;
+    color: var(--gray-500);
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-top: 8px;
+    font-family: monospace;
+    word-break: break-all;
+    max-height: 80px;
+    overflow-y: auto;
+    display: none;
+  }
+  .bina-status.visible { display: block; }
+  .bina-status.err { color: var(--red); background: #fef2f2; border-color: #fecaca; }
+  .bina-status.ok  { color: var(--green); background: #f0fdf4; border-color: #bbf7d0; }
+
+  /* ── TOAST ───────────────────────────────────── */
+  #toast-area {
+    position: fixed;
+    bottom: 20px;
+    right: 50%;
+    transform: translateX(50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 9999;
+    pointer-events: none;
+  }
+  .toast {
+    background: var(--gray-900);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    box-shadow: var(--shadow-lg);
+    animation: toast-in .25s ease, toast-out .3s ease 2.5s forwards;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .toast.success { background: var(--green); }
+  .toast.error   { background: var(--red); }
+  @keyframes toast-in  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes toast-out { from{opacity:1} to{opacity:0;transform:translateY(-8px)} }
+
+  /* ── MODAL ───────────────────────────────────── */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 14px;
+    padding: 0;
+    width: 500px;
+    max-width: 95vw;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+  .modal-head {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--gray-50);
+  }
+  .modal-title { font-size: 16px; font-weight: 700; flex: 1; }
+  .modal-body { padding: 20px 22px; }
+  .modal-foot {
+    padding: 14px 22px;
+    border-top: 1px solid var(--gray-100);
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+  }
+
+  /* Import drag zone */
+  .drop-zone {
+    border: 2px dashed var(--gray-300);
+    border-radius: 10px;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--gray-500);
+    cursor: pointer;
+    transition: all .2s;
+    margin-bottom: 14px;
+  }
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--orange);
+    background: var(--orange-light);
+    color: var(--orange);
+  }
+  .drop-zone .dz-icon { font-size: 36px; margin-bottom: 8px; }
+  .drop-zone p { font-size: 14px; font-weight: 600; }
+  .drop-zone small { font-size: 12px; color: var(--gray-400); }
+
+  /* debug panel */
+  .debug-panel {
+    display: none;
+    background: #111;
+    color: #0f0;
+    font-family: monospace;
+    font-size: 11px;
+    padding: 10px;
+    max-height: 140px;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .debug-panel.open { display: block; }
+  .debug-line { margin-bottom: 2px; }
+  .debug-line.e { color: #f44; }
+  .debug-line.s { color: #4f4; }
+  .debug-line.i { color: #fa0; }
+
+  /* Loader */
+  .loader {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Settings form */
+  .setting-row { margin-bottom: 14px; }
+  .setting-row label { font-size: 12px; font-weight: 600; color: var(--gray-600); display: block; margin-bottom: 4px; }
+  .setting-row input { width: 100%; padding: 8px 11px; border: 1.5px solid var(--gray-200); border-radius: 8px; font-size: 13px; font-family: monospace; outline: none; transition: border-color .2s; }
+  .setting-row input:focus { border-color: var(--orange); }
+  .setting-hint { font-size: 11px; color: var(--gray-400); margin-top: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────────────────── -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🔥</div>
+    <div>
+      <div>שילת | ניהול פריטים</div>
+      <div class="logo-sub">מחובר לבינה ERP</div>
+    </div>
+  </div>
+  <div class="header-sep"></div>
+  <div class="conn-badge" onclick="testConnection()" title="לחץ לבדיקת חיבור">
+    <div class="conn-dot" id="connDot"></div>
+    <span id="connLabel">בדיקת חיבור…</span>
+  </div>
+  <div class="header-space"></div>
+  <button class="h-btn" onclick="openImport()">📥 ייבוא Excel</button>
+  <button class="h-btn" onclick="openSettings()">⚙️ הגדרות</button>
+  <button class="h-btn primary" onclick="openAddPanel()">+ פריט חדש</button>
+</header>
+
+<!-- ── TOOLBAR ────────────────────────────────────────────────────── -->
+<div class="toolbar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="חיפוש לפי שם, מק&quot;ט, קבוצה…" oninput="renderTable()">
+  </div>
+  <select class="filter-select" id="groupFilter" onchange="renderTable()">
+    <option value="">כל הקבוצות</option>
+  </select>
+  <div class="tb-sep"></div>
+  <span class="item-count" id="itemCount">0 פריטים</span>
+  <div style="flex:1"></div>
+  <button class="btn btn-ghost" onclick="loadFromBina()" title="טעינה מחדש מבינה">🔄 טען מבינה</button>
+  <button class="btn btn-ghost" onclick="toggleDebug()" id="debugBtn">🖥 Debug</button>
+</div>
+
+<!-- ── BODY ───────────────────────────────────────────────────────── -->
+<div class="body-wrap" id="bodyWrap">
+
+  <!-- Items table -->
+  <div class="table-wrap" id="tableWrap">
+    <table id="itemsTable">
+      <thead>
+        <tr>
+          <th onclick="sortBy('code')">מק"ט <span class="sort-icon">↕</span></th>
+          <th onclick="sortBy('name')">שם פריט <span class="sort-icon">↕</span></th>
+          <th onclick="sortBy('group')">קבוצה <span class="sort-icon">↕</span></th>
+          <th onclick="sortBy('unit')">יחידה <span class="sort-icon">↕</span></th>
+          <th onclick="sortBy('cost')">עלות ₪ <span class="sort-icon">↕</span></th>
+          <th onclick="sortBy('sale')">מכירה ₪ <span class="sort-icon">↕</span></th>
+          <th>פעיל</th>
+          <th>פעולות</th>
+        </tr>
+      </thead>
+      <tbody id="itemsTbody"></tbody>
+    </table>
+    <div class="empty-state" id="emptyState" style="display:none">
+      <div class="empty-icon">📦</div>
+      <h3>אין פריטים</h3>
+      <p>לחץ "טען מבינה" או "ייבוא Excel" כדי להתחיל</p>
+    </div>
+  </div>
+
+  <!-- Edit / Add panel -->
+  <div class="edit-panel" id="editPanel">
+    <div class="panel-header">
+      <span id="panelIcon">📝</span>
+      <div class="panel-title" id="panelTitle">עריכת פריט</div>
+      <button class="panel-close" onclick="closePanel()">✕</button>
+    </div>
+    <div class="panel-body">
+
+      <!-- Basic info -->
+      <div class="form-section">
+        <div class="section-label">פרטים בסיסיים</div>
+        <div class="form-row">
+          <label>מק"ט *</label>
+          <input type="text" id="f_code" placeholder="לדוגמה: 1001-000-1">
+        </div>
+        <div class="form-row">
+          <label>שם הפריט *</label>
+          <input type="text" id="f_name" placeholder="שם הפריט בעברית">
+        </div>
+        <div class="form-row">
+          <label>שם באנגלית</label>
+          <input type="text" id="f_name_en" placeholder="Item name in English" style="direction:ltr">
+        </div>
+      </div>
+
+      <!-- Classification -->
+      <div class="form-section">
+        <div class="section-label">סיווג</div>
+        <div class="form-row half">
+          <div class="inner">
+            <label>קבוצה</label>
+            <select id="f_group">
+              <option value="">ללא קבוצה</option>
+            </select>
+          </div>
+          <div class="inner">
+            <label>קבוצה חדשה</label>
+            <input type="text" id="f_group_new" placeholder="שם קבוצה חדשה">
+          </div>
+        </div>
+        <div class="form-row half">
+          <div class="inner">
+            <label>יחידת מידה</label>
+            <select id="f_unit">
+              <option value="יח'">יח'</option>
+              <option value="מ&quot;ר">מ"ר</option>
+              <option value="מ&quot;א">מ"א</option>
+              <option value='מ"ל'>מ"ל</option>
+              <option value="ק&quot;ג">ק"ג</option>
+              <option value="ל'">ל'</option>
+              <option value="מטר">מטר</option>
+              <option value="סט">סט</option>
+              <option value="זוג">זוג</option>
+            </select>
+          </div>
+          <div class="inner">
+            <label>ברקוד</label>
+            <input type="text" id="f_barcode" placeholder="אופציונלי" style="direction:ltr">
+          </div>
+        </div>
+      </div>
+
+      <!-- Pricing -->
+      <div class="form-section">
+        <div class="section-label">מחירים</div>
+        <div class="form-row half">
+          <div class="inner">
+            <label>מחיר PDF (מחירון)</label>
+            <input type="number" id="f_list" placeholder="0.00" step="0.01" oninput="calcPrices()">
+          </div>
+          <div class="inner">
+            <label>הנחת ספק %</label>
+            <input type="number" id="f_disc" placeholder="30" value="30" step="1" oninput="calcPrices()">
+          </div>
+        </div>
+        <div class="form-row half">
+          <div class="inner">
+            <label>מחיר עלות ₪</label>
+            <input type="number" id="f_cost" placeholder="0.00" step="0.01">
+            <div class="calc-hint">PDF × <span id="hint_disc">0.70</span></div>
+          </div>
+          <div class="inner">
+            <label>מחיר מכירה ₪</label>
+            <input type="number" id="f_sale" placeholder="0.00" step="0.01">
+            <div class="calc-hint">עלות × <span id="hint_markup">1.50</span></div>
+          </div>
+        </div>
+        <div class="form-row half">
+          <div class="inner">
+            <label>מרווח רצוי %</label>
+            <input type="number" id="f_markup" placeholder="50" value="50" step="1" oninput="calcPrices()">
+          </div>
+          <div class="inner">
+            <label>מחיר מחירון (רשום)</label>
+            <input type="number" id="f_list_price" placeholder="0.00" step="0.01">
+          </div>
+        </div>
+      </div>
+
+      <!-- Extra -->
+      <div class="form-section">
+        <div class="section-label">מידע נוסף</div>
+        <div class="form-row">
+          <label>ספק</label>
+          <input type="text" id="f_supplier" placeholder="שם הספק">
+        </div>
+        <div class="form-row">
+          <label>תיאור</label>
+          <textarea id="f_desc" placeholder="תיאור הפריט…"></textarea>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">פריט פעיל</span>
+          <label class="toggle">
+            <input type="checkbox" id="f_active" checked>
+            <div class="toggle-slider"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Bina sync status -->
+      <div id="binaStatus" class="bina-status"></div>
+
+    </div>
+    <div class="panel-footer">
+      <button class="btn btn-primary" onclick="saveItem()">💾 שמור לבינה</button>
+      <button class="btn btn-ghost" onclick="saveLocal()">📋 שמור מקומי</button>
+      <button class="btn btn-danger" id="deleteBtn" onclick="deleteItem()" style="display:none">🗑</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Debug console -->
+<div class="debug-panel" id="debugPanel"></div>
+
+<!-- Toast area -->
+<div id="toast-area"></div>
+
+<!-- ── MODAL: IMPORT EXCEL ─────────────────────────────────────────── -->
+<div class="modal-backdrop" id="importModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">📥 ייבוא מ-Excel</div>
+      <button class="panel-close" onclick="closeModal('importModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="drop-zone" id="dropZone"
+           onclick="document.getElementById('xlsxInput').click()"
+           ondragover="dz_over(event)" ondragleave="dz_leave()" ondrop="dz_drop(event)">
+        <div class="dz-icon">📊</div>
+        <p>גרור קובץ Excel לכאן או לחץ לבחירה</p>
+        <small>תומך ב-.xlsx שיוצא מבינה</small>
+      </div>
+      <input type="file" id="xlsxInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFile(event)">
+      <div id="importPreview" style="font-size:13px;color:var(--gray-600)"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" id="importConfirmBtn" onclick="confirmImport()" style="display:none">✅ ייבא פריטים</button>
+      <button class="btn btn-ghost" onclick="closeModal('importModal')">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: SETTINGS ─────────────────────────────────────────────── -->
+<div class="modal-backdrop" id="settingsModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">⚙️ הגדרות חיבור</div>
+      <button class="panel-close" onclick="closeModal('settingsModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="setting-row">
+        <label>כתובת Proxy מקומי</label>
+        <input type="text" id="s_proxy" value="http://localhost:5050">
+        <div class="setting-hint">הפרוקסי המקומי שמריצים עם bina_proxy.py</div>
+      </div>
+      <div class="setting-row">
+        <label>כתובת API בינה (דרך Proxy)</label>
+        <input type="text" id="s_bina" value="https://webfiles.binaw.com/post/PostJsonDocV2.aspx" readonly style="color:var(--gray-400)">
+      </div>
+      <div class="setting-row">
+        <label>docType קריאת פריטים</label>
+        <input type="number" id="s_dt_read" value="34">
+      </div>
+      <div class="setting-row">
+        <label>docType כתיבת פריט</label>
+        <input type="number" id="s_dt_write" value="-34">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="saveSettings()">✅ שמור</button>
+      <button class="btn btn-ghost" onclick="closeModal('settingsModal')">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+let items    = [];
+let filtered = [];
+let editId   = null;
+let sortCol  = 'name';
+let sortDir  = 1;
+let debugOpen = false;
+let pendingImport = [];
+
+const PROXY_DEFAULT = window.location.origin;
+
+// settings from localStorage
+let S = {
+  proxy: window.location.origin,
+  dt_read:  34,
+  dt_write: -34
+};
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+window.onload = () => {
+  loadSettings();
+  loadItemsLocal();
+  renderTable();
+  testConnection();
+};
+
+// ── SETTINGS ───────────────────────────────────────────────────────────────
+function loadSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem('bina_settings') || '{}');
+    S = { ...S, ...s };
+    document.getElementById('s_proxy').value    = S.proxy;
+    document.getElementById('s_dt_read').value  = S.dt_read;
+    document.getElementById('s_dt_write').value = S.dt_write;
+  } catch(e) {}
+}
+function saveSettings() {
+  S.proxy    = document.getElementById('s_proxy').value.trim();
+  S.dt_read  = parseInt(document.getElementById('s_dt_read').value)  || 34;
+  S.dt_write = parseInt(document.getElementById('s_dt_write').value) || -34;
+  localStorage.setItem('bina_settings', JSON.stringify(S));
+  closeModal('settingsModal');
+  toast('הגדרות נשמרו', 'success');
+  testConnection();
+}
+
+// ── LOCAL STORAGE ──────────────────────────────────────────────────────────
+function loadItemsLocal() {
+  try {
+    items = JSON.parse(localStorage.getItem('bina_items') || '[]');
+    dbg(`נטענו ${items.length} פריטים מהאחסון המקומי`, 'i');
+  } catch(e) { items = []; }
+}
+function saveItemsLocal() {
+  localStorage.setItem('bina_items', JSON.stringify(items));
+}
+function getGroups() {
+  const s = new Set(items.map(i => i.group).filter(Boolean));
+  return [...s].sort();
+}
+
+// ── BINA API ───────────────────────────────────────────────────────────────
+async function callProxy(payload) {
+  const url = S.proxy + '/bina';
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+  return r.json();
+}
+
+async function testConnection() {
+  setConn('spin', 'בודק…');
+  try {
+    const r = await fetch(S.proxy + '/health', {signal: AbortSignal.timeout(5000)});
+    if (r.ok) {
+      setConn('ok', 'מחובר ✓');
+      dbg('חיבור Proxy תקין', 's');
+    } else {
+      setConn('err', 'שגיאת Proxy');
+      dbg(`Proxy החזיר ${r.status}`, 'e');
+    }
+  } catch(e) {
+    setConn('err', 'Proxy כבוי');
+    dbg('Proxy לא פעיל — הרץ run_bina.bat', 'e');
+    toast('Proxy לא פעיל — הרץ run_bina.bat', 'error');
+  }
+}
+
+async function loadFromBina() {
+  toast('טוען פריטים מבינה…', '');
+  dbg('שולח docType:' + S.dt_read, 'i');
+  try {
+    const res = await callProxy({ docType: S.dt_read });
+    dbg('RAW: ' + (res.raw || '').slice(0, 500), 'i');
+    if (!res.success) { toast('שגיאה: ' + res.error, 'error'); return; }
+
+    let binaItems = [];
+    try {
+      const rp = JSON.parse(res.raw);
+      // Format 1: direct array of items
+      if (Array.isArray(rp) && rp.length > 0 && (rp[0].ItemCode !== undefined || rp[0].itemId !== undefined)) {
+        binaItems = rp;
+      }
+      // Format 2: [{resCode:0, items:[...]}]
+      else if (Array.isArray(rp) && rp[0] && rp[0].items && Array.isArray(rp[0].items)) {
+        binaItems = rp[0].items;
+      }
+      // Format 3: {resCode:0, items:[...]}
+      else if (rp && rp.items && Array.isArray(rp.items)) {
+        binaItems = rp.items;
+      }
+      // Format 4: array with nested list in any key
+      else if (Array.isArray(rp) && rp[0]) {
+        for (const k of Object.keys(rp[0])) {
+          if (Array.isArray(rp[0][k]) && rp[0][k].length > 0 && (rp[0][k][0].ItemCode || rp[0][k][0].itemId)) {
+            binaItems = rp[0][k];
+            dbg('נמצא מפתח: ' + k, 's');
+            break;
+          }
+        }
+      }
+    } catch(pe) { dbg('parse error: ' + pe.message, 'e'); }
+
+    if (binaItems.length > 0) {
+      mergeBinaItems(binaItems);
+      toast('נטענו ' + binaItems.length + ' פריטים מבינה', 'success');
+    } else {
+      dbg('לא נמצאו פריטים בתגובה', 'e');
+      toast('לא התקבלו פריטים — ראה Debug', 'error');
+    }
+  } catch(e) {
+    toast('שגיאת חיבור: ' + e.message, 'error');
+    dbg(e.message, 'e');
+  }
+}
+
+function mergeBinaItems(binaList) {
+  binaList.forEach(bi => {
+    const code = bi.ItemCode || bi.item_code || bi.itemId || bi.kod || '';
+    if (!code) return;
+    const existing = items.find(i => i.code === code);
+    const mapped = {
+      code,
+      name:       bi.ItemName   || bi.item_name || bi.itemDesc  || bi.shem || '',
+      name_en:    bi.ItemNameEn || '',
+      group:      bi.GroupCode  || bi.itemGroup || bi.group || '',
+      unit:       bi.Measure    || bi.itemUnit  || bi.unit  || "יח'",
+      cost:       parseFloat(bi.CostPrice  || bi.itemBuyPrice  || bi.cost  || 0),
+      sale:       parseFloat(bi.SalePrice  || bi.itemSalePrice || bi.sale  || 0),
+      list_price: parseFloat(bi.ListPrice  || bi.itemListPrice || bi.list  || 0),
+      barcode:    bi.Barcode    || bi.itemBarcode || '',
+      supplier:   bi.Supplier   || bi.itemSupplier || '',
+      desc:       bi.Description|| bi.itemDesc2 || bi.desc  || '',
+      active:     bi.Active !== false,
+      _from_bina: true
+    };
+    if (existing) {
+      Object.assign(existing, mapped);
+    } else {
+      mapped.id = Date.now() + Math.random();
+      items.push(mapped);
+    }
+  });
+  saveItemsLocal();
+  renderTable();
+  rebuildGroupFilter();
+}
+
+async function saveToBina(item) {
+  // שולחים גם בשמות החדשים וגם בישנים — בינה תבחר מה שהיא מכירה
+  const payload = {
+    docType:       S.dt_write,
+    // שמות חדשים (כפי שבינה שולחת בקריאה)
+    itemId:        item.code,
+    itemDesc:      item.name,
+    itemGroup:     item.group      || '',
+    itemGroup2:    '',
+    itemUnit:      item.unit       || "יח'",
+    itemBuyPrice:  item.cost       || 0,
+    itemSalePrice: item.sale       || 0,
+    itemListPrice: item.list_price || 0,
+    itemBarcode:   item.barcode    || '',
+    itemSupplier:  item.supplier   || '',
+    itemActive:    item.active !== false ? 1 : 0,
+    // שמות ישנים כגיבוי
+    ItemCode:      item.code,
+    ItemName:      item.name,
+    ItemNameEn:    item.name_en    || '',
+    GroupCode:     item.group      || '',
+    Measure:       item.unit       || "יח'",
+    CostPrice:     item.cost       || 0,
+    SalePrice:     item.sale       || 0,
+    ListPrice:     item.list_price || 0,
+    Barcode:       item.barcode    || '',
+    Supplier:      item.supplier   || '',
+    Description:   item.desc       || '',
+    Active:        item.active !== false ? 1 : 0
+  };
+  dbg('שומר לבינה: ' + JSON.stringify(payload).slice(0,200), 'i');
+  const res = await callProxy(payload);
+  dbg('תגובה שמירה: ' + JSON.stringify(res).slice(0,300), res.success ? 's' : 'e');
+  return res;
+}
+
+// ── TABLE RENDER ───────────────────────────────────────────────────────────
+function renderTable() {
+  const q     = document.getElementById('searchInput').value.toLowerCase().trim();
+  const gf    = document.getElementById('groupFilter').value;
+  filtered    = items.filter(i => {
+    const matchQ = !q ||
+      (i.code  || '').toLowerCase().includes(q) ||
+      (i.name  || '').toLowerCase().includes(q) ||
+      (i.group || '').toLowerCase().includes(q) ||
+      (i.desc  || '').toLowerCase().includes(q);
+    const matchG = !gf || i.group === gf;
+    return matchQ && matchG;
+  });
+
+  // Sort
+  filtered.sort((a, b) => {
+    let va = a[sortCol] || '', vb = b[sortCol] || '';
+    if (typeof va === 'number') return (va - vb) * sortDir;
+    return va.toString().localeCompare(vb.toString(), 'he') * sortDir;
+  });
+
+  const tbody = document.getElementById('itemsTbody');
+  tbody.innerHTML = '';
+
+  if (filtered.length === 0) {
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('itemsTable').style.display = 'none';
+  } else {
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('itemsTable').style.display = '';
+    filtered.forEach(item => {
+      const tr = document.createElement('tr');
+      if (editId === item.id) tr.classList.add('selected');
+      tr.onclick = () => openEditPanel(item);
+      tr.innerHTML = `
+        <td class="code">${item.code || '—'}</td>
+        <td class="name">${item.name || '—'}</td>
+        <td class="group-cell"><span class="group-tag">${item.group || '—'}</span></td>
+        <td>${item.unit || '—'}</td>
+        <td class="price">${fmtPrice(item.cost)}</td>
+        <td class="price">${fmtPrice(item.sale)}</td>
+        <td><span class="active-dot ${item.active !== false ? 'yes' : 'no'}"></span></td>
+        <td>
+          <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px"
+            onclick="event.stopPropagation();openEditPanel(${JSON.stringify(item).replace(/"/g,'&quot;')})">✏️</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+  document.getElementById('itemCount').textContent = `${filtered.length} מתוך ${items.length} פריטים`;
+}
+
+function fmtPrice(v) {
+  if (!v && v !== 0) return '—';
+  return '₪' + parseFloat(v).toFixed(2);
+}
+
+function sortBy(col) {
+  const colMap = { code:'code', name:'name', group:'group', unit:'unit', cost:'cost', sale:'sale' };
+  const key = colMap[col] || col;
+  if (sortCol === key) sortDir = -sortDir;
+  else { sortCol = key; sortDir = 1; }
+  renderTable();
+}
+
+function rebuildGroupFilter() {
+  const sel = document.getElementById('groupFilter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">כל הקבוצות</option>';
+  getGroups().forEach(g => {
+    const o = document.createElement('option');
+    o.value = o.textContent = g;
+    if (g === cur) o.selected = true;
+    sel.appendChild(o);
+  });
+  // Also edit panel group dropdown
+  const fgr = document.getElementById('f_group');
+  if (fgr) {
+    fgr.innerHTML = '<option value="">ללא קבוצה</option>';
+    getGroups().forEach(g => {
+      const o = document.createElement('option');
+      o.value = o.textContent = g;
+      fgr.appendChild(o);
+    });
+  }
+}
+
+// ── PANEL ──────────────────────────────────────────────────────────────────
+function openAddPanel() {
+  editId = null;
+  document.getElementById('panelTitle').textContent = 'פריט חדש';
+  document.getElementById('panelIcon').textContent  = '➕';
+  document.getElementById('deleteBtn').style.display = 'none';
+  clearForm();
+  openPanel();
+}
+
+function openEditPanel(item) {
+  editId = item.id;
+  document.getElementById('panelTitle').textContent = 'עריכת פריט';
+  document.getElementById('panelIcon').textContent  = '✏️';
+  document.getElementById('deleteBtn').style.display = '';
+  fillForm(item);
+  openPanel();
+  renderTable(); // update selection highlight
+}
+
+function openPanel() {
+  document.getElementById('editPanel').classList.add('open');
+  document.getElementById('tableWrap').classList.add('panel-open');
+}
+
+function closePanel() {
+  editId = null;
+  document.getElementById('editPanel').classList.remove('open');
+  document.getElementById('tableWrap').classList.remove('panel-open');
+  renderTable();
+}
+
+function clearForm() {
+  ['f_code','f_name','f_name_en','f_group_new','f_barcode',
+   'f_list','f_disc','f_cost','f_sale','f_markup','f_list_price',
+   'f_supplier','f_desc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = id === 'f_disc' ? '30' : id === 'f_markup' ? '50' : '';
+  });
+  document.getElementById('f_unit').value   = "יח'";
+  document.getElementById('f_group').value  = '';
+  document.getElementById('f_active').checked = true;
+  hideBinaStatus();
+}
+
+function fillForm(item) {
+  document.getElementById('f_code').value     = item.code     || '';
+  document.getElementById('f_name').value     = item.name     || '';
+  document.getElementById('f_name_en').value  = item.name_en  || '';
+  document.getElementById('f_group').value    = item.group    || '';
+  document.getElementById('f_unit').value     = item.unit     || "יח'";
+  document.getElementById('f_barcode').value  = item.barcode  || '';
+  document.getElementById('f_cost').value     = item.cost     || '';
+  document.getElementById('f_sale').value     = item.sale     || '';
+  document.getElementById('f_list').value     = item.list_price || '';
+  document.getElementById('f_list_price').value = item.list_price || '';
+  document.getElementById('f_supplier').value = item.supplier || '';
+  document.getElementById('f_desc').value     = item.desc     || '';
+  document.getElementById('f_active').checked = item.active !== false;
+  hideBinaStatus();
+}
+
+function readForm() {
+  const group = document.getElementById('f_group_new').value.trim() ||
+                document.getElementById('f_group').value;
+  return {
+    id:         editId || (Date.now() + Math.random()),
+    code:       document.getElementById('f_code').value.trim(),
+    name:       document.getElementById('f_name').value.trim(),
+    name_en:    document.getElementById('f_name_en').value.trim(),
+    group,
+    unit:       document.getElementById('f_unit').value,
+    barcode:    document.getElementById('f_barcode').value.trim(),
+    cost:       parseFloat(document.getElementById('f_cost').value) || 0,
+    sale:       parseFloat(document.getElementById('f_sale').value) || 0,
+    list_price: parseFloat(document.getElementById('f_list_price').value) || 0,
+    supplier:   document.getElementById('f_supplier').value.trim(),
+    desc:       document.getElementById('f_desc').value.trim(),
+    active:     document.getElementById('f_active').checked
+  };
+}
+
+function calcPrices() {
+  const list   = parseFloat(document.getElementById('f_list').value) || 0;
+  const disc   = parseFloat(document.getElementById('f_disc').value) || 30;
+  const markup = parseFloat(document.getElementById('f_markup').value) || 50;
+  const factor = (100 - disc) / 100;
+  const cost   = list * factor;
+  const sale   = cost * (1 + markup / 100);
+  document.getElementById('hint_disc').textContent   = factor.toFixed(2);
+  document.getElementById('hint_markup').textContent = (1 + markup/100).toFixed(2);
+  if (list > 0) {
+    document.getElementById('f_cost').value = cost.toFixed(2);
+    document.getElementById('f_sale').value = sale.toFixed(2);
+    document.getElementById('f_list_price').value = list.toFixed(2);
+  }
+}
+
+// ── SAVE ───────────────────────────────────────────────────────────────────
+function saveLocal() {
+  const item = readForm();
+  if (!item.code && !item.name) { toast('נדרש מק"ט או שם', 'error'); return; }
+  upsertItem(item);
+  toast('נשמר מקומית ✓', 'success');
+}
+
+async function saveItem() {
+  const item = readForm();
+  if (!item.code) { toast('נדרש מק"ט', 'error'); return; }
+  if (!item.name) { toast('נדרש שם פריט', 'error'); return; }
+
+  // Save locally first
+  upsertItem(item);
+
+  // Then try Bina
+  showBinaStatus('שולח לבינה…', '');
+  try {
+    const res = await saveToBina(item);
+    if (res.success) {
+      const raw = res.raw || '';
+      if (raw.includes('error') || raw.includes('שגיאה')) {
+        showBinaStatus('⚠ בינה: ' + raw.slice(0,100), 'err');
+        toast('נשמר מקומית, בינה דיווחה שגיאה', 'error');
+      } else {
+        showBinaStatus('✅ בינה אישרה: ' + raw.slice(0,80), 'ok');
+        toast('נשמר בהצלחה ✓', 'success');
+      }
+    } else {
+      showBinaStatus('❌ ' + (res.error || 'שגיאה'), 'err');
+      toast('נשמר מקומית. בינה: ' + res.error, 'error');
+    }
+  } catch(e) {
+    showBinaStatus('❌ Proxy לא פעיל', 'err');
+    toast('נשמר מקומית בלבד (Proxy כבוי)', 'error');
+  }
+}
+
+function upsertItem(item) {
+  const idx = items.findIndex(i => i.id === item.id);
+  if (idx >= 0) {
+    items[idx] = item;
+  } else {
+    items.push(item);
+  }
+  saveItemsLocal();
+  rebuildGroupFilter();
+  renderTable();
+}
+
+function deleteItem() {
+  if (!editId) return;
+  if (!confirm('למחוק פריט זה?')) return;
+  items = items.filter(i => i.id !== editId);
+  saveItemsLocal();
+  rebuildGroupFilter();
+  closePanel();
+  toast('פריט נמחק מקומית', '');
+}
+
+// ── IMPORT ─────────────────────────────────────────────────────────────────
+function openImport() {
+  document.getElementById('importPreview').innerHTML = '';
+  document.getElementById('importConfirmBtn').style.display = 'none';
+  pendingImport = [];
+  openModal('importModal');
+}
+
+function dz_over(e) { e.preventDefault(); document.getElementById('dropZone').classList.add('drag-over'); }
+function dz_leave()  { document.getElementById('dropZone').classList.remove('drag-over'); }
+function dz_drop(e)  {
+  e.preventDefault();
+  dz_leave();
+  if (e.dataTransfer.files[0]) processImportFile(e.dataTransfer.files[0]);
+}
+function handleFile(e) { if (e.target.files[0]) processImportFile(e.target.files[0]); }
+
+function processImportFile(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext === 'csv') { importCSV(file); return; }
+  // For xlsx — basic TSV parse (if user saved as xlsx from Excel)
+  // We'll use a simple approach without a lib: ask user to export as CSV
+  document.getElementById('importPreview').innerHTML = `
+    <p style="color:var(--orange);font-weight:600">💡 טיפ:</p>
+    <p>לייבוא XLSX, פתח ב-Excel ושמור בתור <b>CSV (UTF-8)</b>, ואז ייבא שוב.</p>
+    <p>לחלופין, ייצא מבינה ישירות לאקסל ושמור כ-CSV.</p>`;
+}
+
+function importCSV(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split('\n').filter(l => l.trim());
+    if (lines.length < 2) { document.getElementById('importPreview').textContent = 'קובץ ריק'; return; }
+    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g,''));
+    pendingImport = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(',').map(c => c.trim().replace(/"/g,''));
+      const row  = {};
+      headers.forEach((h,j) => row[h] = cols[j] || '');
+      // Try to map common column names
+      const item = {
+        id:         Date.now() + i,
+        code:       row['מקט'] || row['קוד'] || row['ItemCode'] || row['מק"ט'] || cols[0] || '',
+        name:       row['שם']  || row['שם פריט'] || row['ItemName'] || cols[1] || '',
+        group:      row['קבוצה'] || row['GroupCode'] || '',
+        unit:       row['יחידה'] || row['Measure'] || "יח'",
+        cost:       parseFloat(row['עלות'] || row['CostPrice'] || 0),
+        sale:       parseFloat(row['מחיר'] || row['SalePrice'] || 0),
+        list_price: parseFloat(row['מחירון'] || row['ListPrice'] || 0),
+        barcode:    row['ברקוד'] || '',
+        supplier:   row['ספק']  || '',
+        desc:       row['תיאור'] || '',
+        active:     true
+      };
+      if (item.code || item.name) pendingImport.push(item);
+    }
+    document.getElementById('importPreview').innerHTML =
+      `<p style="color:var(--green);font-weight:600">✅ זוהו <b>${pendingImport.length}</b> פריטים</p>`;
+    document.getElementById('importConfirmBtn').style.display = '';
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+function confirmImport() {
+  if (!pendingImport.length) return;
+  let added = 0, updated = 0;
+  pendingImport.forEach(pi => {
+    const existing = items.find(i => i.code === pi.code);
+    if (existing) { Object.assign(existing, pi); updated++; }
+    else           { items.push(pi); added++; }
+  });
+  saveItemsLocal();
+  rebuildGroupFilter();
+  renderTable();
+  closeModal('importModal');
+  toast(`ייבוא הושלם: ${added} חדשים, ${updated} עודכנו`, 'success');
+}
+
+// ── UI HELPERS ─────────────────────────────────────────────────────────────
+function setConn(state, label) {
+  document.getElementById('connDot').className   = 'conn-dot ' + state;
+  document.getElementById('connLabel').textContent = label;
+}
+
+function showBinaStatus(msg, cls) {
+  const el = document.getElementById('binaStatus');
+  el.textContent = msg;
+  el.className = 'bina-status visible ' + cls;
+}
+function hideBinaStatus() {
+  const el = document.getElementById('binaStatus');
+  el.className = 'bina-status';
+}
+
+function toast(msg, type) {
+  const area = document.getElementById('toast-area');
+  const t    = document.createElement('div');
+  t.className = 'toast ' + (type || '');
+  const icons = { success:'✅', error:'❌', '':'ℹ️' };
+  t.innerHTML = `<span>${icons[type]||'ℹ️'}</span> ${msg}`;
+  area.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function openSettings() {
+  document.getElementById('s_proxy').value    = S.proxy;
+  document.getElementById('s_dt_read').value  = S.dt_read;
+  document.getElementById('s_dt_write').value = S.dt_write;
+  openModal('settingsModal');
+}
+
+function toggleDebug() {
+  debugOpen = !debugOpen;
+  document.getElementById('debugPanel').classList.toggle('open', debugOpen);
+  document.getElementById('debugBtn').textContent = debugOpen ? '✕ סגור Debug' : '🖥 Debug';
+}
+
+function dbg(msg, type) {
+  const panel = document.getElementById('debugPanel');
+  const d = document.createElement('div');
+  d.className = 'debug-line ' + (type||'');
+  const ts = new Date().toLocaleTimeString('he-IL');
+  d.textContent = `[${ts}] ${msg}`;
+  panel.appendChild(d);
+  panel.scrollTop = panel.scrollHeight;
+  console.log(msg);
+}
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal-backdrop').forEach(bd => {
+  bd.addEventListener('click', e => {
+    if (e.target === bd) closeModal(bd.id);
+  });
+});
+
+// Init group dropdown
+rebuildGroupFilter();
+</script>
+</body>
+</html>
