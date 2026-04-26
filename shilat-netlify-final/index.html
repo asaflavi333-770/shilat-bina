@@ -6470,7 +6470,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // 📧 Gmail Integration
 // ═══════════════════════════════════════════════════════
 var GMAIL_CLIENT_ID='396789390344-iopr6cvq8kf26l3jb23e33bkuah303s2.apps.googleusercontent.com';
-var GMAIL_SCOPES='https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
+var GMAIL_SCOPES='https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
 var _gmailToken=null,_gmailUser=null,_gmailTokenClient=null,_gmailThreads=[],_gmailActiveThread=null;
 
 function initGmailClient(){
