@@ -5302,19 +5302,44 @@ function showApp(){
   // טעינת נתונים מהענן
   _loadCloudData();
 }
+async function forceCloudSync(){
+  toast('☁️ מוחק cache וטוען מהענן...');
+  localStorage.removeItem('sh3_customers');
+  localStorage.removeItem('sh3_leads');
+  localStorage.removeItem('sh3_service');
+  _cloudCache={};
+  await _loadCloudData();
+}
 async function _loadCloudData(){
   var keys=['customers','leads','service'];
-  var loaded=false;
+  var anyLoaded=false;
+  // הצג toast התחלה
+  var toastEl=null;
   for(var i=0;i<keys.length;i++){
     var k=keys[i];
-    var local=[];try{var v=localStorage.getItem('sh3_'+k);if(v&&v!=='[]')local=JSON.parse(v);}catch(e){}
+    var local=[];
+    try{var v=localStorage.getItem('sh3_'+k);if(v&&v!=='[]')local=JSON.parse(v);}catch(e){}
     if(!local||local.length===0){
-      toast('☁️ טוען '+k+' מהענן...');
+      if(!anyLoaded){toast('☁️ טוען נתונים מהענן, אנא המתן...');}
+      anyLoaded=true;
       var data=await _cloudLoad(k);
-      if(data&&data.length>0){loaded=true;toast('✅ '+data.length+' '+k+' נטענו מהענן');}
+      if(data&&data.length>0){
+        _cloudCache[k]=data;
+        try{localStorage.setItem('sh3_'+k,JSON.stringify(data));}catch(e){}
+        toast('✅ '+data.length+' '+k+' נטענו');
+      }
     }
   }
-  if(loaded){UB();if(document.getElementById('pg-dash'))G('dash');}
+  // רענן תצוגה
+  UB();
+  var curPg=document.querySelector('.page.active');
+  if(curPg){
+    var pgId=curPg.id.replace('pg-','');
+    if(pgId==='customers')rCust();
+    else if(pgId==='service')rSvc();
+    else if(pgId==='leads')rLeads();
+    else if(pgId==='dashboard')rDash();
+  }
 }
 function addLogoutBtn(){
   if(document.getElementById('logout-area'))return;
@@ -5322,7 +5347,9 @@ function addLogoutBtn(){
   var tb=document.querySelector('.topbar')||document.querySelector('header');if(!tb)return;
   var a=document.createElement('div');a.id='logout-area';
   a.style.cssText='display:flex;align-items:center;gap:8px;margin-right:auto';
-  a.innerHTML='<span style="font-size:12px;color:var(--muted)">'+cu.name+'</span><button onclick="doLogout()" style="background:rgba(239,68,68,.15);color:#ef4444;border:none;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit">יציאה</button>';
+  a.innerHTML='<span style="font-size:12px;color:var(--muted)">'+cu.name+'</span>'+
+    '<button onclick="forceCloudSync()" style="background:rgba(59,130,246,.15);color:#6af;border:none;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit" title="טען נתונים מהענן">☁️</button>'+
+    '<button onclick="doLogout()" style="background:rgba(239,68,68,.15);color:#ef4444;border:none;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit">יציאה</button>';
   tb.appendChild(a);
 }
 
